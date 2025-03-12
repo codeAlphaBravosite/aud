@@ -3,601 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceOver Generator</title>
-    <style>
-        :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #166088;
-            --background-color: #f9f9f9;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
-            --error-color: #f44336;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-        }
-
-        .settings-icon {
-            cursor: pointer;
-            font-size: 24px;
-            color: var(--secondary-color);
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .card {
-            background-color: var(--card-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        .input-section {
-            grid-column: 1 / -1;
-        }
-
-        textarea {
-            width: 100%;
-            height: 200px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            resize: vertical;
-            font-size: 1rem;
-            margin-bottom: 15px;
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .output-section {
-            display: none;
-        }
-
-        .version-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
-
-        .audio-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .audio-player {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .download-btn {
-            background-color: var(--success-color);
-        }
-
-        .download-btn:hover {
-            background-color: #3d8b40;
-        }
-
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .settings-content {
-            background-color: var(--card-color);
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--primary-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            color: var(--error-color);
-            margin-top: 10px;
-            display: none;
-        }
-
-        .text-chunk {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .text-chunk-content {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .status-waiting {
-            background-color: #cccccc;
-        }
-
-        .status-processing {
-            background-color: var(--warning-color);
-        }
-
-        .status-complete {
-            background-color: var(--success-color);
-        }
-
-        .status-error {
-            background-color: var(--error-color);
-        }
-
-        .version-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .version-card {
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 10px;
-        }
-
-        .version-label {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-    </style>
+    <title>ElevenLabs Voiceover Generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>VoiceOver Generator</h1>
-        <span class="settings-icon" id="settingsButton">⚙️</span>
-    </header>
-
     <div class="container">
-        <div class="card input-section">
-            <textarea id="inputText" placeholder="Paste your text here. Use '।' to indicate where to split long texts (the symbol will be removed during processing)."></textarea>
-            <button id="generateButton">Generate Voiceovers</button>
-            <div class="error-message" id="errorMessage"></div>
-        </div>
-
-        <div class="loading" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>Generating voiceovers...</p>
-        </div>
-
-        <div id="outputContainer"></div>
-    </div>
-
-    <div class="settings-modal" id="settingsModal">
-        <div class="settings-content">
-            <div class="settings-header">
-                <h2>Settings</h2>
-                <button class="close-btn" id="closeSettingsButton">&times;</button>
+        <header>
+            <h1>Voiceover Generator</h1>
+            <div class="header-buttons">
+                <button id="resetBtn" class="icon-button danger" title="Reset All Voiceovers">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"></path><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+                </button>
+                <button id="settingsBtn" class="icon-button" title="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
             </div>
-            <div class="form-group">
-                <label for="apiKey">ElevenLabs API Key</label>
-                <input type="password" id="apiKey" placeholder="Enter your API key">
+        </header>
+
+        <main>
+            <div class="input-section">
+                <textarea id="textInput" placeholder="Enter your text here. Use '।' to split text into chunks for longer content..."></textarea>
+                <button id="generateBtn" class="primary-button">Generate Voiceovers</button>
             </div>
-            <div class="form-group">
-                <label for="voiceId">Voice ID</label>
-                <input type="text" id="voiceId" placeholder="Enter default voice ID">
-            </div>
-            <div class="form-group">
-                <label for="stability">Stability (0.0 - 1.0)</label>
-                <input type="number" id="stability" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="form-group">
-                <label for="clarity">Clarity Enhancement (0.0 - 1.0)</label>
-                <input type="number" id="clarity" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="form-group">
-                <label for="style">Style (0.0 - 1.0)</label>
-                <input type="number" id="style" min="0" max="1" step="0.1" value="0.0">
-            </div>
-            <button id="saveSettingsButton">Save Settings</button>
-        </div>
-    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const inputText = document.getElementById('inputText');
-            const generateButton = document.getElementById('generateButton');
-            const outputContainer = document.getElementById('outputContainer');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const errorMessage = document.getElementById('errorMessage');
-            const settingsButton = document.getElementById('settingsButton');
-            const settingsModal = document.getElementById('settingsModal');
-            const closeSettingsButton = document.getElementById('closeSettingsButton');
-            const saveSettingsButton = document.getElementById('saveSettingsButton');
-            const apiKeyInput = document.getElementById('apiKey');
-            const voiceIdInput = document.getElementById('voiceId');
-            const stabilityInput = document.getElementById('stability');
-            const clarityInput = document.getElementById('clarity');
-            const styleInput = document.getElementById('style');
+            <div id="outputSection" class="output-section"></div>
+        </main>
 
-            // Settings
-            let settings = {
-                apiKey: localStorage.getItem('elevenLabsApiKey') || '',
-                voiceId: localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM', // Default voice
-                stability: parseFloat(localStorage.getItem('elevenLabsStability') || '0.5'),
-                clarity: parseFloat(localStorage.getItem('elevenLabsClarity') || '0.5'),
-                style: parseFloat(localStorage.getItem('elevenLabsStyle') || '0.0')
-            };
-
-            // Initialize settings form
-            apiKeyInput.value = settings.apiKey;
-            voiceIdInput.value = settings.voiceId;
-            stabilityInput.value = settings.stability;
-            clarityInput.value = settings.clarity;
-            styleInput.value = settings.style;
-
-            // Settings Modal Handlers
-            settingsButton.addEventListener('click', () => {
-                settingsModal.style.display = 'flex';
-            });
-
-            closeSettingsButton.addEventListener('click', () => {
-                settingsModal.style.display = 'none';
-            });
-
-            saveSettingsButton.addEventListener('click', () => {
-                settings.apiKey = apiKeyInput.value.trim();
-                settings.voiceId = voiceIdInput.value.trim();
-                settings.stability = parseFloat(stabilityInput.value);
-                settings.clarity = parseFloat(clarityInput.value);
-                settings.style = parseFloat(styleInput.value);
-
-                // Save to localStorage
-                localStorage.setItem('elevenLabsApiKey', settings.apiKey);
-                localStorage.setItem('elevenLabsVoiceId', settings.voiceId);
-                localStorage.setItem('elevenLabsStability', settings.stability);
-                localStorage.setItem('elevenLabsClarity', settings.clarity);
-                localStorage.setItem('elevenLabsStyle', settings.style);
-
-                settingsModal.style.display = 'none';
-            });
-
-            // Click outside to close modal
-            window.addEventListener('click', (e) => {
-                if (e.target === settingsModal) {
-                    settingsModal.style.display = 'none';
-                }
-            });
-
-            // Generate Voiceovers
-            generateButton.addEventListener('click', async () => {
-                const text = inputText.value.trim();
-                if (!text) {
-                    showError('Please enter some text to convert.');
-                    return;
-                }
-
-                if (!settings.apiKey) {
-                    showError('Please enter your ElevenLabs API key in the settings.');
-                    settingsModal.style.display = 'flex';
-                    return;
-                }
-
-                resetUI();
-                showLoading(true);
-                
-                try {
-                    // Split text based on the delimiter (।)
-                    const textChunks = text.includes('।') 
-                        ? text.split('।').map(chunk => chunk.trim()).filter(chunk => chunk.length > 0)
-                        : [text];
-                    
-                    // Create chunk containers
-                    createChunkContainers(textChunks);
-                    
-                    // Process each chunk
-                    for (let i = 0; i < textChunks.length; i++) {
-                        const chunkElement = document.getElementById(`chunk-${i}`);
-                        const statusElement = chunkElement.querySelector('.status-indicator');
-                        
-                        statusElement.classList.remove('status-waiting');
-                        statusElement.classList.add('status-processing');
-                        
-                        await processTextChunk(textChunks[i], i);
-                        
-                        statusElement.classList.remove('status-processing');
-                        statusElement.classList.add('status-complete');
-                    }
-                } catch (error) {
-                    console.error('Error generating voiceovers:', error);
-                    showError(error.message || 'Failed to generate voiceovers. Please check your settings and try again.');
-                } finally {
-                    showLoading(false);
-                }
-            });
-
-            function createChunkContainers(textChunks) {
-                outputContainer.innerHTML = '';
-                
-                textChunks.forEach((chunk, index) => {
-                    const chunkCard = document.createElement('div');
-                    chunkCard.className = 'card text-chunk';
-                    chunkCard.id = `chunk-${index}`;
-                    
-                    const chunkHeader = document.createElement('div');
-                    chunkHeader.innerHTML = `
-                        <div>
-                            <span class="status-indicator status-waiting"></span>
-                            <strong>Text Chunk ${index + 1}</strong>
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button id="closeSettings" class="icon-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" placeholder="Enter your ElevenLabs API key">
+                    </div>
+                    <div class="form-group">
+                        <label for="voicesList">Select Voice</label>
+                        <select id="voicesList" class="form-select">
+                            <option value="">Loading voices...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="voiceId">Add Shared Voice</label>
+                        <div class="input-group">
+                            <input type="text" id="voiceId" placeholder="Enter shared voice ID">
+                            <button id="addVoiceBtn" class="secondary-button">Add Voice</button>
                         </div>
-                    `;
-                    
-                    const chunkContent = document.createElement('div');
-                    chunkContent.className = 'text-chunk-content';
-                    chunkContent.textContent = chunk;
-                    
-                    const versionsContainer = document.createElement('div');
-                    versionsContainer.className = 'version-container';
-                    versionsContainer.id = `versions-${index}`;
-                    
-                    chunkCard.appendChild(chunkHeader);
-                    chunkCard.appendChild(chunkContent);
-                    chunkCard.appendChild(versionsContainer);
-                    
-                    outputContainer.appendChild(chunkCard);
-                });
-            }
-
-            async function processTextChunk(text, chunkIndex) {
-                const versionsContainer = document.getElementById(`versions-${chunkIndex}`);
-                
-                // Generate 3 variations of the audio
-                for (let version = 1; version <= 3; version++) {
-                    try {
-                        const versionCard = document.createElement('div');
-                        versionCard.className = 'version-card';
-                        versionCard.innerHTML = `
-                            <div class="version-label">Version ${version}</div>
-                            <div class="audio-controls">
-                                <audio class="audio-player" controls></audio>
-                                <button class="download-btn" disabled>Download</button>
-                            </div>
-                        `;
-                        
-                        versionsContainer.appendChild(versionCard);
-                        
-                        const audioPlayer = versionCard.querySelector('.audio-player');
-                        const downloadBtn = versionCard.querySelector('.download-btn');
-                        
-                        // Create slightly different settings for each version
-                        const versionSettings = createVersionSettings(version);
-                        
-                        // Generate audio
-                        const audioBlob = await generateAudio(text, versionSettings);
-                        
-                        // Set audio source
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        audioPlayer.src = audioUrl;
-                        
-                        // Enable download button
-                        downloadBtn.disabled = false;
-                        downloadBtn.addEventListener('click', () => {
-                            const a = document.createElement('a');
-                            a.href = audioUrl;
-                            a.download = `voiceover_chunk${chunkIndex + 1}_version${version}.mp3`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        });
-                    } catch (error) {
-                        console.error(`Error generating version ${version} for chunk ${chunkIndex}:`, error);
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'error-message';
-                        errorDiv.style.display = 'block';
-                        errorDiv.textContent = `Failed to generate Version ${version}: ${error.message}`;
-                        versionsContainer.appendChild(errorDiv);
-                    }
-                }
-            }
-
-            function createVersionSettings(version) {
-                // Create slight variations for each version
-                let versionSettings = {...settings};
-                
-                switch(version) {
-                    case 1:
-                        // Default settings
-                        break;
-                    case 2:
-                        // Slightly more stable
-                        versionSettings.stability = Math.min(settings.stability + 0.15, 1.0);
-                        versionSettings.clarity = Math.max(settings.clarity - 0.05, 0.0);
-                        break;
-                    case 3:
-                        // More style/emotion
-                        versionSettings.style = Math.min(settings.style + 0.25, 1.0);
-                        versionSettings.stability = Math.max(settings.stability - 0.1, 0.0);
-                        break;
-                }
-                
-                return versionSettings;
-            }
-
-            async function generateAudio(text, versionSettings) {
-                const url = `https://api.elevenlabs.io/v1/text-to-speech/${versionSettings.voiceId}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'xi-api-key': versionSettings.apiKey
-                    },
-                    body: JSON.stringify({
-                        text: text,
-                        model_id: 'eleven_multilingual_v2',
-                        voice_settings: {
-                            stability: versionSettings.stability,
-                            similarity_boost: versionSettings.clarity,
-                            style: versionSettings.style
-                        }
-                    })
-                });
-                
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        throw new Error(errorJson.detail?.message || errorJson.detail || 'Unknown API error');
-                    } catch (e) {
-                        throw new Error(`API Error: ${response.status} - ${errorText || response.statusText}`);
-                    }
-                }
-                
-                return await response.blob();
-            }
-
-            function showLoading(show) {
-                loadingIndicator.style.display = show ? 'block' : 'none';
-                generateButton.disabled = show;
-            }
-
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 5000);
-            }
-
-            function resetUI() {
-                errorMessage.style.display = 'none';
-                outputContainer.innerHTML = '';
-            }
-        });
-    </script>
+                    </div>
+                    <div class="form-group">
+                        <label for="stability">Stability (0-1)</label>
+                        <input type="range" id="stability" min="0" max="1" step="0.1" value="0.5">
+                        <span id="stabilityValue">0.5</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="similarityBoost">Similarity Boost (0-1)</label>
+                        <input type="range" id="similarityBoost" min="0" max="1" step="0.1" value="0.7">
+                        <span id="similarityBoostValue">0.7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
